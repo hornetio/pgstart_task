@@ -23,8 +23,10 @@ tasks_postgres_load   ubuntu              &quot;bash -c &apos;apt update…&quot
 docker compose exec postgres psql -U postgres interview
 ```
 После этого переходим в DBeaver и подключаемся к localhost:15466
+
+
 В итоге запущен контейнер, а также имеется подключение к базе данных, поэтому можно переходить непосредственно к задаче.
-### Запрос
+### Оптимизация запроса
 Далее было необходимо выполнить следующий запрос:
 ```
 explain analyze verbose
@@ -48,8 +50,14 @@ SELECT body
 |        Worker 1:  actual time=4927.508..35350.127 rows=17 loops=1|
 |Planning Time: 25.177 ms|
 |Execution Time: 35493.888 ms|
+
+
 Как видим, запланированное и фактическое время выполнения отличаются.
+
+
 Для ускорения выполнения запроса было решено пойти самым тривиальным путем - создание GIN(generalized inverted index)
+
+
 Необходимо было довавить расширение pq_trgm для like выражений
 ```
 create extension if not exists pg_trgm;
@@ -80,6 +88,8 @@ SELECT body
 |              Index Cond: (posts.body ~~* '%postgres%amazing%'::text)|
 |Planning Time: 8.583 ms|
 |Execution Time: 43.151 ms|
+
+
 Как видим скорость выполнения запроса значительно улучшилась, перейдем к ответам на вопросы.
 
 
